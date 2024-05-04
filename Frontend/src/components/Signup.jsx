@@ -1,22 +1,57 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Login from "./Login";
 import { useForm } from "react-hook-form";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 function Signup() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
 
-  const onSubmit = (data) => console.log(data);
+  const location = useLocation();
+  const nevigate = useNavigate();
+  const from = location.state?.form?.pathname || "/";
+  const { register, handleSubmit, formState: { errors } } = useForm();
+
+  const onSubmit = (data) => {
+    const userInfo = {
+      fullname: data.fullname,
+      email: data.email,
+      password: data.password
+    };
+  
+    axios.post("http://localhost:4001/user/signup", userInfo)
+      .then((res) => {
+        console.log(res.data);
+        const userData = res.data;
+        if (userData) {
+          
+          toast.success('Signup Successfully!');
+          nevigate(from, { replace: true });
+        }
+        localStorage.setItem("Users", JSON.stringify(userData.user));
+      })
+      .catch((err) => {
+        console.error("Error:", err);
+        if (err.response) {
+          
+          toast.error(`Error: ${err.response.data.message}`);
+        } else if (err.request) {
+          console.error("No response received:", err.request);
+         
+          toast.error("No response received from server");
+        } else {
+          console.error("Request setup error:", err.message);
+          
+          toast.error("Error in setting up request");
+        }
+      });
+  };
+  
   return (
-    <div className="flex h-screen items-center justify-center ">
+    <div className="flex h-screen items-center justify-center">
       <dialog className="border-[2px] shadow-md p-5 rounded-md modal" open>
         <div className="modal-box">
-          <form onSubmit={handleSubmit(onSubmit)} method="dialog">
-            {/* if there is a button in form, it will close the modal */}
+          <form onSubmit={handleSubmit(onSubmit)}>
             <Link
               to="/"
               className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
@@ -24,7 +59,6 @@ function Signup() {
               ✕
             </Link>
             <h3 className="font-bold text-lg">Signup</h3>
-            {/* {Name} */}
             <div className="mt-4 space-y-2">
               <span>Name</span>
               <br />
@@ -32,16 +66,15 @@ function Signup() {
                 type="text"
                 placeholder="Enter Your Name"
                 className="w-80 px-3 py-1 border rounded"
-                {...register("name", { required: true })}
+                {...register("fullname", { required: true })}
               />
               <br />
-              {errors.name && (
+              {errors.fullname && (
                 <span className="text-sm text-red-500">
-                  Name field is required
+                  Full name field is required
                 </span>
               )}
             </div>
-            {/* {Email} */}
             <div className="mt-4 space-y-2">
               <span>Email</span>
               <br />
@@ -58,7 +91,6 @@ function Signup() {
                 </span>
               )}
             </div>
-            {/* {password} */}
             <div className="mt-4 space-y-2">
               <span>Password</span>
               <br />
@@ -75,22 +107,21 @@ function Signup() {
                 </span>
               )}
             </div>
-            {/* {Button} */}
             <div className="flex justify-around mt-4">
-              <button className="bg-pink-500 text-white rounded-md px-3 py-1 hover:bg-pink-700 duration-200">
+              <button
+                type="submit"
+                className="bg-pink-500 text-white rounded-md px-3 py-1 hover:bg-pink-700 duration-200"
+              >
                 Signup
               </button>
               <p>
                 Have Account?{" "}
                 <button
                   className="underline text-blue-500 cursor-pointer"
-                  onClick={() =>
-                    document.getElementById("my_modal_3").showModal()
-                  }
+                  onClick={() => console.log("Implement login modal logic")}
                 >
                   Login
                 </button>
-                <Login />
               </p>
             </div>
           </form>
