@@ -19,7 +19,7 @@ function Signup() {
       password: data.password
     };
   
-    axios.post("http://localhost:4001/user/signup", userInfo)
+    axios.post("/user/signup", userInfo)
       .then((res) => {
         console.log(res.data);
         const userData = res.data;
